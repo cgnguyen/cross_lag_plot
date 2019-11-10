@@ -6,6 +6,9 @@ library(directlabels)
 library(ggfittext)
 
 
+
+
+
 clmp_graph<-function(model_name,var_names,var_labels){
   #Check for optional parameter variable labels
   if(missing(var_labels)) {
@@ -37,7 +40,7 @@ clmp_graph<-function(model_name,var_names,var_labels){
   model_lavaan<-model_lavaan %>%
     filter(op =="~")  %>%
     extract(data=., col=lhs, into="depvar", regex=var_regex,remove=F) %>%
-    extract(data=., col=rhs, into="indepvar", regex=var_regex,remove=F) %>%
+    extract(data=., col=rhs, into="indepvar", regex=var_regex,remove=F)%>%
     select(depvar,indepvar,est,pvalue) %>%
     distinct(depvar,indepvar, .keep_all = T) %>%
     mutate(type = ifelse(pvalue < 0.05, "solid", "dotted")) %>%
@@ -46,13 +49,14 @@ clmp_graph<-function(model_name,var_names,var_labels){
       pvalue>0.05 ~"",
       pvalue<0.05 & pvalue >0.01  ~ "*", 
       pvalue<0.01 & pvalue >0.001  ~ "**",  
-      pvalue<0.001 ~ "***")) %>%
-    mutate(labels=paste(label,stars, sep=""))
-  
+      pvalue<0.001 ~ "***"))%>%
+    mutate(labels=paste(label,stars, sep="")) %>%
+    arrange(match(depvar,var_names),match(indepvar,var_names))
+
   #Results for autoregressive paths
   auto.arrows<-model_lavaan %>%
     filter(depvar==indepvar) %>%
-    select(labels,type) %>%
+    select(depvar,labels,type) %>%
     bind_cols(.,auto.arrows) %>%
     filter(type=="solid")
   
@@ -65,15 +69,15 @@ clmp_graph<-function(model_name,var_names,var_labels){
     filter(depvar!=indepvar) %>%
     filter(depvar != var_names[1] | indepvar != var_names[3])%>%
     filter(depvar != var_names[3] | indepvar!=var_names[1])
-  model_cross
+  
   
   #Generate Arrows 
   crosslag.arrows<-data.frame(
     x1=c(2,2,2,2), 
     x2=c(4,4,4,4), 
-    y1=c(2,5,3,4), 
-    y2=c(3,4,2,5),
-    desc =c("1 to 2","3 to 2","2 to 1","2 to 3"))
+    y1=c(3,2,5,4), 
+    y2=c(2,3,4,5),
+    desc =c("2 to 1","1 to 2","3 to 2","2 to 3"))
   
   #Copy line type
   crosslag.arrows<-cbind(model_cross,crosslag.arrows)
@@ -82,8 +86,8 @@ clmp_graph<-function(model_name,var_names,var_labels){
   
   crosslag.labels<-data.frame(
     x1=c(2.5,2.5,2.5,2.5), 
-    y1=c(2.25,4.75,2.75,4.25),
-    desc =c("1 to 2","3 to 2","2 to 1","2 to 3"))
+    y1=c(2.75,2.25,4.75,4.25),
+    desc =c("2 to 1","1 to 2","3 to 2","2 to 3"))
   
   crosslag.labels$labels<-model_cross$est
   crosslag.labels$type<-model_cross$type

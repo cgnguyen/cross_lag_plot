@@ -89,11 +89,10 @@ clmp_graph<-function(model_name,var_names,var_labels){
     y1=c(2.75,2.25,4.75,4.25),
     desc =c("2 to 1","1 to 2","3 to 2","2 to 3"))
   
-  crosslag.labels$labels<-model_cross$est
+  crosslag.labels$labels<-model_cross$labels
   crosslag.labels$type<-model_cross$type
   
   crosslag.labels<-crosslag.labels %>%
-    mutate(labels=round(labels,3)) %>%
     filter(type=="solid")
   
   #Generate Graph 

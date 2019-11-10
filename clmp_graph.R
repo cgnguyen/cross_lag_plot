@@ -1,8 +1,11 @@
 #Note Requires the following packages
-#needs(tidyverse)
-#needs(ggplot2)
-#needs(directlabels)
-#needs(ggfittext)
+
+library(tidyverse)
+library(ggplot2)
+library(directlabels)
+library(ggfittext)
+
+
 clmp_graph<-function(model_name,var_names,var_labels){
   #Check for optional parameter variable labels
   if(missing(var_labels)) {
